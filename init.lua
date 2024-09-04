@@ -84,6 +84,23 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- Setting python executable to the pyenv shim
+
+if vim.fn.has 'win32' == 1 then
+  -- Windows-specific settings
+  vim.o.shell = 'cmd.exe'
+  vim.o.shellcmdflag = '/c'
+  vim.o.shellquote = '"'
+  vim.o.shellxquote = '"'
+  vim.g.python3_host_prog = 'C:/Users/samtn/.pyenv/pyenv-win/shims/python'
+else
+  -- Unix-like settings (for WSL or actual Unix systems)
+  vim.o.shell = 'bash'
+  vim.o.shellcmdflag = '-c'
+  -- You might need to adjust this path for non-Windows Python
+  vim.g.python3_host_prog = '/c/Users/samtn/.pyenv/pyenv-win/shims/python'
+end
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -91,7 +108,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +119,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -189,6 +206,14 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- keymaps for moving lines up and down
+vim.keymap.set('n', '<C-j>', ':m .+1<CR>==', { desc = 'Move line down', silent = true })
+vim.keymap.set('n', '<C-k>', ':m .-2<CR>==', { desc = 'Move line up', silent = true })
+vim.keymap.set('i', '<C-j>', '<Esc>:m .+1<CR>==gi', { desc = 'Move line down', silent = true })
+vim.keymap.set('i', '<C-k>', '<Esc>:m .-2<CR>==gi', { desc = 'Move line up', silent = true })
+vim.keymap.set('v', '<C-j>', ':m >+1<CR>gv==gv', { desc = 'Move selection down', silent = true })
+vim.keymap.set('v', '<C-k>', ':m <-2<CR>gv==gv', { desc = 'Move selection up', silent = true })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -346,12 +371,19 @@ require('lazy').setup({
       require('telescope').setup {
         -- You can put your default mappings / updates / etc. in here
         --  All the info you're looking for is in `:help telescope.setup()`
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
+
+        defaults = {
+          file_ignore_patterns = {
+            '.git',
+            'build',
+            'node_modules',
+            'dist',
+            '__pycache__',
+          },
+          mappings = {
+            i = { ['<c-enter>'] = 'to_fuzzy_refine' },
+          },
+        },
         -- pickers = {}
         extensions = {
           ['ui-select'] = {
@@ -892,7 +924,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -914,6 +946,8 @@ require('lazy').setup({
     },
   },
 })
+
+require('custom.tabs_config').setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
