@@ -263,7 +263,7 @@ require('lazy').setup({
   -- Use `opts = {}` to force a plugin to be loaded.
   --
 
-  -- Here is a more advanced example where we pass configuration
+  -- Here is a more advanced example where we pass configurationinit
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
   --    require('gitsigns').setup({ ... })
   --
@@ -379,6 +379,7 @@ require('lazy').setup({
             'node_modules',
             'dist',
             '__pycache__',
+            'CMakeFiles',
           },
           mappings = {
             i = { ['<c-enter>'] = 'to_fuzzy_refine' },
@@ -601,7 +602,10 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {
+          cmd = { 'clangd', '--background-index', '--compile-commands-dir=.', '--completion-style=detailed' },
+          root_dir = require('lspconfig.util').root_pattern('compile_flags.txt', '.clangd', '.git'),
+        },
         -- gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
