@@ -66,7 +66,14 @@ return {
     ft = { 'http', 'rest' },
     opts = {},
     config = function()
-      require('kulala').setup()
+      require('kulala').setup {
+        -- Enabling formatters for JSON (and other formats)
+        formatters = {
+          json = { 'jq', '.' },
+          xml = { 'xmllint', '--format', '-' },
+          html = { 'xmllint', '--format', '--html', '-' },
+        },
+      }
 
       vim.keymap.set({ 'n', 'v' }, '<leader>kr', ':lua require("kulala").run()<CR>', { desc = 'Kulala: Run Request' })
       vim.keymap.set({ 'n', 'v' }, '<leader>ka', ':lua require("kulala").run_all()<CR>', { desc = 'Kulala: Run all Requests' })
