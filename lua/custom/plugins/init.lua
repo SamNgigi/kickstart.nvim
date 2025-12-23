@@ -42,4 +42,38 @@ return {
       vim.g.db_ui_use_nerd_fonts = 1
     end,
   },
+  -- mason + lsp
+  { 'williamboman/mason.nvim' },
+  { 'williamboman/mason-lspconfig.nvim' },
+  { 'neovim/nvim-lspconfig' },
+  -- completion
+  { 'hrsh7th/nvim-cmp' },
+  { 'hrsh7th/cmp-nvim-lsp' },
+  -- treesitter
+  { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' },
+  -- Salesforce helpers
+  { 'jonathanmorris180/salesforce.nvim' }, -- optional
+  { 'xixiaofinland/sf.nvim', ft = { 'apex', 'soql', 'sosl' } }, -- optional
+  -- Rust
+  {
+    'mrcjkb/rustaceanvim',
+    version = '^6', -- Recommended
+    lazy = false, -- This plugin is already lazy
+  },
+  -- nvim http client
+  {
+    'mistweaverco/kulala.nvim',
+    ft = { 'http', 'rest' },
+    opts = {},
+    config = function()
+      require('kulala').setup()
+
+      vim.keymap.set({ 'n', 'v' }, '<leader>kr', ':lua require("kulala").run()<CR>', { desc = 'Kulala: Run Request' })
+      vim.keymap.set({ 'n', 'v' }, '<leader>ka', ':lua require("kulala").run_all()<CR>', { desc = 'Kulala: Run all Requests' })
+      vim.keymap.set('n', '<leader>kt', ':lua require("kulala").toggle_view()<CR>', { desc = 'Kulala: Toggle view' })
+      vim.keymap.set('n', '<leader>kc', ':lua require("kulala").copy()<CR>', { desc = 'Kulala: Copy as cURL' })
+      vim.keymap.set('n', '<leader>kR', ':lua require("kulala").replay()<CR>', { desc = 'Kulala: Replay the last request' })
+      vim.keymap.set('n', '<leader>ks', ':lua require("kulala").scratchpad()<CR>', { desc = 'Kulala: Replay the last request' })
+    end,
+  },
 }

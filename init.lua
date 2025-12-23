@@ -84,7 +84,7 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
--- Setting python executable to the pyenv shim
+-- Setting
 
 if vim.fn.has 'win32' == 1 then
   -- Windows-specific settings
@@ -376,10 +376,21 @@ require('lazy').setup({
           file_ignore_patterns = {
             '.git',
             'build',
+            'target',
             'node_modules',
             'dist',
             '__pycache__',
             'CMakeFiles',
+            '.cache',
+            '.venv',
+            'venv',
+          },
+          pickers = {
+            find_files = {
+              hidden = true,
+              -- Explicitly include .gitignore and .env files
+              find_command = { 'rg', '--files', '--hidden', '--glob', '!**/.git/*', '-g', '.gitignore', '-g', '.env' },
+            },
           },
           mappings = {
             i = { ['<c-enter>'] = 'to_fuzzy_refine' },
@@ -603,20 +614,32 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         clangd = {
-          cmd = { 'clangd', '--background-index', '--compile-commands-dir=.', '--completion-style=detailed' },
+          cmd = {
+            'clangd',
+            '--background-index',
+            '--compile-commands-dir=.',
+            '--completion-style=detailed',
+          },
           root_dir = require('lspconfig.util').root_pattern('compile_flags.txt', '.clangd', '.git'),
         },
-        -- gopls = {},
-        -- pyright = {},
-        -- rust_analyzer = {},
+        gopls = {},
+        pyright = {},
+        rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
         --
-        -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
+        -- But for many setups, the LSP (`ts_ls`) will work just fine
+        ts_ls = {},
         --
+        -- Salesforce Development
+        -- apex_ls = {
+        --   filetypes = {'apex'},
+        --   root_dir = function(fname)
+        --     return require(ls)
+        --
+        -- },
 
         lua_ls = {
           -- cmd = {...},
@@ -916,10 +939,10 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
-  -- require 'kickstart.plugins.autopairs',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
@@ -952,6 +975,10 @@ require('lazy').setup({
 })
 
 require('custom.tabs_config').setup()
+require('custom.keymaps_config').setup()
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
+
+-- Disabling Man
+vim.g.loaded_man = 1
