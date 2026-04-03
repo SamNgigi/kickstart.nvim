@@ -42,13 +42,7 @@ return {
       vim.g.db_ui_use_nerd_fonts = 1
     end,
   },
-  -- mason + lsp
-  -- { 'williamboman/mason.nvim' },
-  -- { 'williamboman/mason-lspconfig.nvim' },
-  -- { 'neovim/nvim-lspconfig' },
-  -- -- completion
-  -- { 'hrsh7th/nvim-cmp' },
-  -- { 'hrsh7th/cmp-nvim-lsp' },
+
   -- treesitter
   {
     'nvim-treesitter/nvim-treesitter',
