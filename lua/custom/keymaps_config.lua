@@ -8,6 +8,8 @@ function K.setup()
   vim.keymap.set('n', '<M-Right>', '<C-w>>', { noremap = true, silent = true }) -- increase/decrease size to the right
   vim.keymap.set('n', '<M-Left>', '<C-w><', { noremap = true, silent = true }) -- increase/decrease size to the left
   vim.keymap.set('n', '<M-q>', ':close<CR>', { noremap = true, silent = true }) -- close window
+
+  vim.keymap.set('n', '<leader>bo', ':%bd|e#|bd#<CR>', { desc = 'Close all buffers except current' })
 end
 
 return K

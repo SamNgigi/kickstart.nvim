@@ -43,22 +43,49 @@ return {
     end,
   },
   -- mason + lsp
-  { 'williamboman/mason.nvim' },
-  { 'williamboman/mason-lspconfig.nvim' },
-  { 'neovim/nvim-lspconfig' },
-  -- completion
-  { 'hrsh7th/nvim-cmp' },
-  { 'hrsh7th/cmp-nvim-lsp' },
+  -- { 'williamboman/mason.nvim' },
+  -- { 'williamboman/mason-lspconfig.nvim' },
+  -- { 'neovim/nvim-lspconfig' },
+  -- -- completion
+  -- { 'hrsh7th/nvim-cmp' },
+  -- { 'hrsh7th/cmp-nvim-lsp' },
   -- treesitter
-  { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' },
+  {
+    'nvim-treesitter/nvim-treesitter',
+    build = ':TSUpdate',
+    config = function()
+      require("nvim-treesitter.configs").setup({
+        auto_install = true,
+        ensure_installed = { "rust", "lua", "toml", "markdown", "vim", "vimdoc" },
+        highlight = { enable = true },
+        indent = { enable = true },
+      })
+    end,
+  },
   -- Salesforce helpers
   { 'jonathanmorris180/salesforce.nvim' }, -- optional
   { 'xixiaofinland/sf.nvim', ft = { 'apex', 'soql', 'sosl' } }, -- optional
   -- Rust
   {
     'mrcjkb/rustaceanvim',
-    version = '^6', -- Recommended
-    lazy = false, -- This plugin is already lazy
+    version = '^6',
+    lazy = false,
+    init = function()
+      vim.g.rustaceanvim = {
+        server = {
+          default_settings = {
+            ["rust-analyzer"] = {
+              checkOnSave = true,
+              check = {
+                command = "clippy",
+                extraArgs = { "--no-deps" },
+              },
+              files = { watcher = "server" },
+            },
+          },
+        },
+      }
+    end,
   },
   -- nvim http client
   {
