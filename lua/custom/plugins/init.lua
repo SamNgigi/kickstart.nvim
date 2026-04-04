@@ -52,7 +52,8 @@ return {
         auto_install = true,
         ensure_installed = { "rust", "lua", "toml", "markdown", "vim", "vimdoc" },
         highlight = { enable = true },
-        indent = { enable = true },
+        indent = { enable = false },
+        incremental_selection = { enable = false },
       })
     end,
   },
