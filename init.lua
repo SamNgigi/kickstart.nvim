@@ -174,8 +174,23 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+-- Claude Code - Auto-reload files Claude modifies
+
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold' }, {
+  command = 'checktime',
+})
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
+
+-- Diff current buffer against saved version on disk
+vim.api.nvim_create_user_command('DiffOrig', function()
+  vim.cmd 'vert new | set bt=nofile | r # | 0d_ | diffthis | wincmd p | diffthis'
+end, {})
+-- Diff Keymaps
+vim.keymap.set('n', '<leader>do', '<cmd>DiffOrig<cr>', { desc = '[D]iff [O]rig' })
+vim.keymap.set('n', '<leader>dc', '<cmd>diffoff!<cr>', { desc = '[D]iff [C]lose' })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
