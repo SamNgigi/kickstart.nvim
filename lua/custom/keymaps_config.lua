@@ -1,6 +1,8 @@
 local K = {}
 
 function K.setup()
+  -- INFO:
+  vim.keymap.set('n', '<C-u>', '<C-i>', { desc = 'Jump forward (jumplist)' })
   -- INFO: Window management
   vim.keymap.set('n', '<M-w>', ':vsplit<CR>', { noremap = true, silent = true }) -- open split window
   vim.keymap.set('n', '<M-e>', '<C-w>=', { noremap = true, silent = true }) -- equal size split window
@@ -19,7 +21,20 @@ function K.setup()
   vim.keymap.set('t', '<A-e>', '<C-\\><C-n><C-w>=', { desc = 'Equal size split terminal with buffer' })
 
   -- INFO: Creating scratch buffer for different file types
-  vim.keymap.set('n', '<leader>dn', function()
+  vim.keymap.set('n', '<leader>bn', function()
+    vim.ui.input({ prompt = 'Scratch filetype (leave blank for none): ' }, function(ft)
+      vim.cmd 'enew'
+      vim.bo.buftype = 'nofile'
+      vim.bo.bufhidden = 'wipe'
+      if ft and ft ~= '' then
+        vim.bo.filetype = ft
+      end
+      -- vim.cmd 'diffthis | wincmd p | diffthis'
+    end)
+  end, { desc = 'Diff with new scratch buffer' })
+
+  -- INFO: Creating vertical split scratch buffer for different file types
+  vim.keymap.set('n', '<leader>bvn', function()
     vim.ui.input({ prompt = 'Scratch filetype (leave blank for none): ' }, function(ft)
       vim.cmd 'vnew'
       vim.bo.buftype = 'nofile'

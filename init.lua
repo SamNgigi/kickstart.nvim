@@ -92,13 +92,13 @@ if vim.fn.has 'win32' == 1 then
   vim.o.shellcmdflag = '/c'
   vim.o.shellquote = '"'
   vim.o.shellxquote = '"'
-  vim.g.python3_host_prog = 'C:/Users/samtn/.pyenv/pyenv-win/shims/python'
+  vim.g.python3_host_prog = 'C:/Users/jedi/.pyenv/pyenv-win/shims/python'
 else
   -- Unix-like settings (for WSL or actual Unix systems)
   vim.o.shell = 'bash'
   vim.o.shellcmdflag = '-c'
   -- You might need to adjust this path for non-Windows Python
-  vim.g.python3_host_prog = '/c/Users/samtn/.pyenv/pyenv-win/shims/python'
+  vim.g.python3_host_prog = '/c/Users/jedi/.pyenv/pyenv-win/shims/python'
 end
 
 -- Set <space> as the leader key
@@ -253,7 +253,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    -- vim.highlight.on_yank()
+    vim.hl.on_yank()
   end,
 })
 
@@ -353,7 +354,7 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    -- branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -369,6 +370,9 @@ require('lazy').setup({
           return vim.fn.executable 'make' == 1
         end,
       },
+      -- extension for passing regex arguments/flags to live_grep
+      { 'nvim-telescope/telescope-live-grep-args.nvim' },
+      -- ui
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
@@ -434,6 +438,7 @@ require('lazy').setup({
 
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
+      pcall(require('telescope').load_extension, 'live_grep_args')
       pcall(require('telescope').load_extension, 'ui-select')
 
       -- See `:help telescope.builtin`
@@ -443,7 +448,10 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      -- vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sg', function()
+        require('telescope').extensions.live_grep_args.live_grep_args()
+      end, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
@@ -589,7 +597,7 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          if client and client:supports_method('textDocument/documentHighlight', event.buf) then
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -616,7 +624,7 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          if client and client:supports_method('textDocument/inlayHint', event.buf) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
@@ -697,6 +705,9 @@ require('lazy').setup({
               -- diagnostics = { disable = { 'missing-fields' } },
             },
           },
+        },
+        emmet_language_server = {
+          filetypes = { 'html', 'css', 'scss', 'javascript', 'javascriptreact', 'typescriptreact', 'vue', 'svelte', 'solid' },
         },
       }
 
@@ -945,32 +956,64 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
+    lazy = false,
     build = ':TSUpdate',
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    config = function(_, opts)
-      -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+    config = function()
+      local ts = require 'nvim-treesitter'
+      ts.install {
+        'rust',
+        'python',
+        'typescript',
+        'tsx',
+        'toml',
+        'yaml',
+        'sql',
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      }
 
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter.configs').setup(opts)
+      local function attach(buf, lang)
+        if not vim.api.nvim_buf_is_valid(buf) then
+          return
+        end
+        if not vim.treesitter.language.add(lang) then
+          return
+        end
+        vim.treesitter.start(buf, lang)
+        if vim.treesitter.query.get(lang, 'indents') then
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end
 
-      -- There are additional nvim-treesitter modules that you can use to interact
-      -- with nvim-treesitter. You should go explore a few and see what interests you:
-      --
-      --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-      --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-      --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+      local available = ts.get_available()
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('ts-attach', { clear = true }),
+        callback = function(args)
+          local lang = vim.treesitter.language.get_lang(args.match)
+          if not lang then
+            return
+          end
+          if vim.tbl_contains(ts.get_installed 'parsers', lang) then
+            attach(args.buf, lang)
+          elseif vim.tbl_contains(available, lang) then
+            ts.install(lang):await(function()
+              attach(args.buf, lang)
+            end)
+          else
+            attach(args.buf, lang)
+          end
+        end,
+      })
     end,
   },
 
@@ -1020,6 +1063,9 @@ require('lazy').setup({
 
 require('custom.tabs_config').setup()
 require('custom.keymaps_config').setup()
+-- INFO: Not including custom shell because it was specifically for claude code to work
+-- the way I wanted which did not work as expected anyway
+-- require 'custom.shell'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
